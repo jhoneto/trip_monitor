@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: Kitetrip One
+  start_date: 2025-09-02 10:20:36
+  end_date: 2025-09-02 10:20:36
+  company: one
+
+two:
+  name: Kitetrip Two
+  start_date: 2025-09-02 10:20:36
+  end_date: 2025-09-02 10:20:36
+  company: two

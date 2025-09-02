@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  email: user1@example.com
+  encrypted_password: $2a$12$test_password_hash
+
+two:
+  email: user2@example.com
+  encrypted_password: $2a$12$test_password_hash

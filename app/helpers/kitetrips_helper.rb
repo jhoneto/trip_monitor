@@ -1,0 +1,2 @@
+module KitetripsHelper
+end
