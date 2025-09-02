@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_02_142249) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_02_145947) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "postgis"
 
   create_table "companies", force: :cascade do |t|
     t.string "name", null: false
@@ -48,7 +49,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_02_142249) do
     t.datetime "end_date", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.geometry "route_path", limit: {srid: 4326, type: "line_string"}
+    t.geometry "start_point", limit: {srid: 4326, type: "st_point"}
+    t.geometry "end_point", limit: {srid: 4326, type: "st_point"}
+    t.string "name"
+    t.text "description"
+    t.index ["end_point"], name: "index_kitetrip_routes_on_end_point", using: :gist
     t.index ["kitetrip_id"], name: "index_kitetrip_routes_on_kitetrip_id"
+    t.index ["route_path"], name: "index_kitetrip_routes_on_route_path", using: :gist
+    t.index ["start_point"], name: "index_kitetrip_routes_on_start_point", using: :gist
   end
 
   create_table "kitetrips", force: :cascade do |t|
