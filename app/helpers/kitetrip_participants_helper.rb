@@ -1,0 +1,2 @@
+module KitetripParticipantsHelper
+end
