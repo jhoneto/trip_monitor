@@ -6,24 +6,79 @@
   <% end %>
 
   <div class="flex justify-between items-center">
-    <h1 class="font-bold text-4xl">Kitetrip participants</h1>
-    <%= link_to "New kitetrip participant", new_kitetrip_participant_path, class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
+    <div>
+      <h1 class="font-bold text-4xl">Kitetrip participants</h1>
+      <p class="text-gray-600 mt-1">Participants for <%= @kitetrip.name %></p>
+    </div>
+    <%= link_to "New kitetrip participant", new_kitetrip_kitetrip_participant_path(@kitetrip), class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
   </div>
 
-  <div id="kitetrip_participants" class="min-w-full divide-y divide-gray-200 space-y-5">
+  <div class="mt-8 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
     <% if @kitetrip_participants.any? %>
-      <% @kitetrip_participants.each do |kitetrip_participant| %>
-        <div class="flex flex-col sm:flex-row justify-between items-center pb-5 sm:pb-0">
-          <%= render kitetrip_participant %>
-          <div class="w-full sm:w-auto flex flex-col sm:flex-row space-x-2 space-y-2">
-            <%= link_to "Show", kitetrip_participant, class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-            <%= link_to "Edit", edit_kitetrip_participant_path(kitetrip_participant), class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
-            <%= button_to "Destroy", kitetrip_participant, method: :delete, class: "w-full sm:w-auto rounded-md px-3.5 py-2.5 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", data: { turbo_confirm: "Are you sure?" } %>
-          </div>
-        </div>
-      <% end %>
+      <table class="min-w-full divide-y divide-gray-300">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Nome do Participante</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Função</th>
+            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Data de Participação</th>
+            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+              <span class="sr-only">Ações</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+          <% @kitetrip_participants.each do |kitetrip_participant| %>
+            <tr class="hover:bg-gray-50">
+              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                <%= link_to kitetrip_participant.user.name, [@kitetrip, kitetrip_participant], class: "text-blue-600 hover:text-blue-900 font-medium" %>
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <%= kitetrip_participant.user.email %>
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <% case kitetrip_participant.role %>
+                <% when 'organizer' %>
+                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">Organizador</span>
+                <% when 'guide' %>
+                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Guia</span>
+                <% when 'participant' %>
+                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Participante</span>
+                <% else %>
+                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"><%= kitetrip_participant.role.capitalize %></span>
+                <% end %>
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <%= kitetrip_participant.created_at.strftime("%d/%m/%Y") %>
+              </td>
+              <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                <div class="flex justify-end space-x-2">
+                  <%= link_to "Ver", [@kitetrip, kitetrip_participant], class: "text-blue-600 hover:text-blue-900" %>
+                  <%= link_to "Editar", edit_kitetrip_kitetrip_participant_path(@kitetrip, kitetrip_participant), class: "text-indigo-600 hover:text-indigo-900" %>
+                  <%= link_to "Excluir", [@kitetrip, kitetrip_participant], method: :delete, 
+                      class: "text-red-600 hover:text-red-900", 
+                      data: { turbo_confirm: "Tem certeza que deseja remover este participante?" } %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     <% else %>
-      <p class="text-center my-10">No kitetrip participants found.</p>
+      <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum participante encontrado</h3>
+        <p class="mt-1 text-sm text-gray-500">Comece adicionando participantes a esta viagem.</p>
+        <div class="mt-6">
+          <%= link_to "Adicionar Participante", new_kitetrip_kitetrip_participant_path(@kitetrip), class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      </div>
     <% end %>
+  </div>
+  
+  <div class="mt-6 pt-4 border-t">
+    <%= link_to "Back to #{@kitetrip.name}", @kitetrip, class: "rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
   </div>
 </div>

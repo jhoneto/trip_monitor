@@ -1,4 +1,4 @@
-class KitetripsController < ApplicationController
+class KitetripsController < BaseController
   before_action :set_kitetrip, only: %i[ show edit update destroy ]
 
   # GET /kitetrips or /kitetrips.json
@@ -22,6 +22,7 @@ class KitetripsController < ApplicationController
   # POST /kitetrips or /kitetrips.json
   def create
     @kitetrip = Kitetrip.new(kitetrip_params)
+    @kitetrip.company = current_user.companies.first if current_user.companies.any?
 
     respond_to do |format|
       if @kitetrip.save

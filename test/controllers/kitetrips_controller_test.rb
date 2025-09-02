@@ -3,6 +3,8 @@ require "test_helper"
 class KitetripsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @kitetrip = kitetrips(:one)
+    @user = @kitetrip.company.user
+    sign_in @user
   end
 
   test "should get index" do
