@@ -1,84 +1,287 @@
-<% content_for :title, "Kitetrip participants" %>
-
-<div class="w-full">
-  <% if notice.present? %>
-    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
-  <% end %>
-
-  <div class="flex justify-between items-center">
+<div class="bg-white shadow-sm border border-gray-200 rounded-lg">
+  <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
     <div>
-      <h1 class="font-bold text-4xl">Kitetrip participants</h1>
-      <p class="text-gray-600 mt-1">Participants for <%= @kitetrip.name %></p>
+      <h2 class="text-lg font-semibold text-gray-900">Participantes do Kitetrip</h2>
+      <p class="text-sm text-gray-600"><%= @kitetrip.name %></p>
     </div>
-    <%= link_to "New kitetrip participant", new_kitetrip_kitetrip_participant_path(@kitetrip), class: "rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white block font-medium" %>
+    <button id="add-participant-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+      Adicionar Participante
+    </button>
   </div>
 
-  <div class="mt-8 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+  <div class="p-6">
     <% if @kitetrip_participants.any? %>
-      <table class="min-w-full divide-y divide-gray-300">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Nome do Participante</th>
-            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
-            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Função</th>
-            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Data de Participação</th>
-            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-              <span class="sr-only">Ações</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 bg-white">
-          <% @kitetrip_participants.each do |kitetrip_participant| %>
-            <tr class="hover:bg-gray-50">
-              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                <%= link_to kitetrip_participant.user.name, [@kitetrip, kitetrip_participant], class: "text-blue-600 hover:text-blue-900 font-medium" %>
-              </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                <%= kitetrip_participant.user.email %>
-              </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                <% case kitetrip_participant.role %>
-                <% when 'organizer' %>
-                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">Organizador</span>
-                <% when 'guide' %>
-                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Guia</span>
-                <% when 'participant' %>
-                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Participante</span>
-                <% else %>
-                  <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"><%= kitetrip_participant.role.capitalize %></span>
-                <% end %>
-              </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                <%= kitetrip_participant.created_at.strftime("%d/%m/%Y") %>
-              </td>
-              <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                <div class="flex justify-end space-x-2">
-                  <%= link_to "Ver", [@kitetrip, kitetrip_participant], class: "text-blue-600 hover:text-blue-900" %>
-                  <%= link_to "Editar", edit_kitetrip_kitetrip_participant_path(@kitetrip, kitetrip_participant), class: "text-indigo-600 hover:text-indigo-900" %>
-                  <%= link_to "Excluir", [@kitetrip, kitetrip_participant], method: :delete, 
-                      class: "text-red-600 hover:text-red-900", 
-                      data: { turbo_confirm: "Tem certeza que deseja remover este participante?" } %>
+      <div class="grid gap-4">
+        <% @kitetrip_participants.each do |participant| %>
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg" data-participant-id="<%= participant.id %>">
+            <div class="flex items-center space-x-3">
+              <div class="flex-shrink-0">
+                <div class="h-10 w-10 bg-gray-300 rounded-full flex items-center justify-center">
+                  <span class="text-sm font-medium text-gray-700">
+                    <%= participant.user.email.first.upcase %>
+                  </span>
                 </div>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-900"><%= participant.user.email %></p>
+                <div class="flex items-center space-x-2">
+                  <span class="text-sm text-gray-500" data-role-text="<%= participant.id %>"><%= participant.role_humanized %></span>
+                  <button onclick="toggleRoleEdit(<%= participant.id %>)" class="text-xs text-blue-600 hover:text-blue-800 focus:outline-none">
+                    Alterar
+                  </button>
+                </div>
+                <div id="role-edit-<%= participant.id %>" class="hidden mt-2">
+                  <select onchange="updateRole(<%= participant.id %>, this.value)" class="text-xs border rounded px-2 py-1">
+                    <option value="participant" <%= "selected" if participant.role == "participant" %>>Participante</option>
+                    <option value="organizer" <%= "selected" if participant.role == "organizer" %>>Organizador</option>
+                    <option value="guide" <%= "selected" if participant.role == "guide" %>>Guia</option>
+                  </select>
+                  <button onclick="cancelRoleEdit(<%= participant.id %>)" class="text-xs text-gray-600 hover:text-gray-800 ml-2">
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button onclick="removeParticipant(<%= participant.id %>)" class="text-red-600 hover:text-red-800 focus:outline-none">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        <% end %>
+      </div>
     <% else %>
       <div class="text-center py-12">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
         </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum participante encontrado</h3>
-        <p class="mt-1 text-sm text-gray-500">Comece adicionando participantes a esta viagem.</p>
-        <div class="mt-6">
-          <%= link_to "Adicionar Participante", new_kitetrip_kitetrip_participant_path(@kitetrip), class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-        </div>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum participante</h3>
+        <p class="mt-1 text-sm text-gray-500">Comece adicionando participantes a este kitetrip.</p>
       </div>
     <% end %>
   </div>
-  
-  <div class="mt-6 pt-4 border-t">
-    <%= link_to "Back to #{@kitetrip.name}", @kitetrip, class: "rounded-md px-3.5 py-2.5 bg-gray-100 hover:bg-gray-50 inline-block font-medium" %>
+</div>
+
+<!-- Modal para adicionar participante -->
+<div id="participant-modal" class="fixed inset-0 bg-gray-900 bg-opacity-30 hidden flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+    <!-- Header do Modal -->
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold text-gray-900">Adicionar Participante</h3>
+        <button id="close-modal" class="text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full p-2 transition-colors duration-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo do Modal -->
+    <div class="p-6">
+      <form id="add-participant-form">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-gray-700 text-sm font-semibold mb-2">Email do Usuário</label>
+            <input type="email" id="user-email" name="kitetrip_participant[email]" 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200" 
+                   placeholder="Digite o email do usuário" required>
+            <div id="email-suggestions" class="hidden mt-2 border border-gray-300 rounded-lg bg-white shadow-lg max-h-40 overflow-y-auto"></div>
+          </div>
+
+          <div>
+            <label class="block text-gray-700 text-sm font-semibold mb-2">Função</label>
+            <select name="kitetrip_participant[role]" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200">
+              <option value="participant">Participante</option>
+              <option value="organizer">Organizador</option>
+              <option value="guide">Guia</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer do Modal -->
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+      <button type="button" id="cancel-btn" 
+              class="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 font-medium">
+        Cancelar
+      </button>
+      <button type="submit" form="add-participant-form"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 font-medium">
+        Adicionar
+      </button>
+    </div>
   </div>
 </div>
+
+<script>
+const modal = document.getElementById('participant-modal');
+const addParticipantBtn = document.getElementById('add-participant-btn');
+const closeModal = document.getElementById('close-modal');
+const cancelBtn = document.getElementById('cancel-btn');
+const form = document.getElementById('add-participant-form');
+const emailInput = document.getElementById('user-email');
+const emailSuggestions = document.getElementById('email-suggestions');
+
+// Abrir modal
+addParticipantBtn.addEventListener('click', () => {
+  modal.classList.remove('hidden');
+  emailInput.focus();
+});
+
+// Fechar modal
+[closeModal, cancelBtn].forEach(btn => {
+  btn.addEventListener('click', () => {
+    modal.classList.add('hidden');
+    form.reset();
+    emailSuggestions.classList.add('hidden');
+  });
+});
+
+// Fechar modal clicando fora
+window.addEventListener('click', (event) => {
+  if (event.target === modal) {
+    modal.classList.add('hidden');
+    form.reset();
+    emailSuggestions.classList.add('hidden');
+  }
+});
+
+// Buscar usuários
+let searchTimeout;
+emailInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  const query = emailInput.value.trim();
+
+  if (query.length < 2) {
+    emailSuggestions.classList.add('hidden');
+    return;
+  }
+
+  searchTimeout = setTimeout(() => {
+    fetch(`<%= search_users_kitetrip_kitetrip_participants_path(@kitetrip) %>?email=${encodeURIComponent(query)}`)
+      .then(response => response.json())
+      .then(users => {
+        if (users.length > 0) {
+          emailSuggestions.innerHTML = users.map(user =>
+            `<div class="p-2 hover:bg-gray-100 cursor-pointer border-b" onclick="selectUser('${user.email}')">
+              ${user.email}
+            </div>`
+          ).join('');
+          emailSuggestions.classList.remove('hidden');
+        } else {
+          emailSuggestions.classList.add('hidden');
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao buscar usuários:', error);
+        emailSuggestions.classList.add('hidden');
+      });
+  }, 300);
+});
+
+function selectUser(email) {
+  emailInput.value = email;
+  emailSuggestions.classList.add('hidden');
+}
+
+// Submeter formulário
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(form);
+
+  fetch('<%= kitetrip_kitetrip_participants_path(@kitetrip) %>', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      location.reload();
+    } else {
+      alert(data.error || 'Erro ao adicionar participante');
+    }
+  })
+  .catch(error => {
+    console.error('Erro:', error);
+    alert('Erro ao adicionar participante');
+  });
+});
+
+// Remover participante
+function removeParticipant(participantId) {
+  if (confirm('Tem certeza que deseja remover este participante?')) {
+    fetch(`<%= kitetrip_kitetrip_participants_path(@kitetrip) %>/${participantId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        document.querySelector(`[data-participant-id="${participantId}"]`).remove();
+      } else {
+        alert(data.error || 'Erro ao remover participante');
+      }
+    })
+    .catch(error => {
+      console.error('Erro:', error);
+      alert('Erro ao remover participante');
+    });
+  }
+}
+
+// Alternar edição de função
+function toggleRoleEdit(participantId) {
+  const roleText = document.querySelector(`[data-role-text="${participantId}"]`);
+  const roleEdit = document.getElementById(`role-edit-${participantId}`);
+
+  roleText.classList.toggle('hidden');
+  roleEdit.classList.toggle('hidden');
+}
+
+// Cancelar edição de função
+function cancelRoleEdit(participantId) {
+  const roleText = document.querySelector(`[data-role-text="${participantId}"]`);
+  const roleEdit = document.getElementById(`role-edit-${participantId}`);
+
+  roleText.classList.remove('hidden');
+  roleEdit.classList.add('hidden');
+}
+
+// Atualizar função
+function updateRole(participantId, newRole) {
+  fetch(`<%= kitetrip_kitetrip_participants_path(@kitetrip) %>/${participantId}/update_role`, {
+    method: 'PATCH',
+    body: JSON.stringify({ role: newRole }),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const roleText = document.querySelector(`[data-role-text="${participantId}"]`);
+      roleText.textContent = data.role_humanized;
+      cancelRoleEdit(participantId);
+    } else {
+      alert(data.error || 'Erro ao alterar função');
+    }
+  })
+  .catch(error => {
+    console.error('Erro:', error);
+    alert('Erro ao alterar função');
+  });
+}
+</script>

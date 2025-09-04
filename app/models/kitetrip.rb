@@ -5,5 +5,7 @@ class Kitetrip < ApplicationRecord
   has_many :kitetrip_routes, dependent: :destroy
   has_many :kitetrip_participants, dependent: :destroy
   has_many :kitetrip_events, dependent: :destroy
+  has_many :kitetrip_users, dependent: :destroy
   has_many :users, through: :kitetrip_participants
+  has_many :assigned_users, through: :kitetrip_users, source: :user
 end

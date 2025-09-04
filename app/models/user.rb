@@ -7,4 +7,7 @@ class User < ApplicationRecord
   has_many :companies, dependent: :destroy
   has_many :kitetrip_participants, dependent: :destroy
   has_many :kitetrips, through: :kitetrip_participants
+  has_many :kitetrip_users, dependent: :destroy
+  has_many :assigned_kitetrips, through: :kitetrip_users, source: :kitetrip
+  has_many :api_tokens, dependent: :destroy
 end

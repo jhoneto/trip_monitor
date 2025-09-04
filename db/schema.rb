@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_02_145947) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_04_013000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "postgis"
+
+  create_table "api_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token"
+    t.string "device_id"
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_api_tokens_on_user_id"
+  end
 
   create_table "companies", force: :cascade do |t|
     t.string "name", null: false
@@ -82,6 +92,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_02_145947) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "api_tokens", "users"
   add_foreign_key "companies", "users"
   add_foreign_key "kitetrip_events", "kitetrips"
   add_foreign_key "kitetrip_participants", "kitetrips"
