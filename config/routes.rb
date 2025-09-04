@@ -21,6 +21,8 @@ Rails.application.routes.draw do
       post "auth/login", to: "auth#login"
       delete "auth/logout", to: "auth#logout"  
       delete "auth/logout_all", to: "auth#logout_all"
+      
+      resource :user, only: [:show, :update]
     end
   end
 
