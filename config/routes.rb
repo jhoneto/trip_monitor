@@ -23,6 +23,7 @@ Rails.application.routes.draw do
       delete "auth/logout_all", to: "auth#logout_all"
       
       resource :user, only: [:show, :update]
+      resources :kitetrips, only: [:index, :show]
     end
   end
 

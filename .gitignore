@@ -40,3 +40,6 @@
 .claude-on-rails/sessions/
 .claude-swarm/
 claude-swarm.log
+
+
+.byebug_history
