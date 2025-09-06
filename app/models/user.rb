@@ -10,4 +10,5 @@ class User < ApplicationRecord
   has_many :kitetrip_users, dependent: :destroy
   has_many :assigned_kitetrips, through: :kitetrip_users, source: :kitetrip
   has_many :api_tokens, dependent: :destroy
+  has_many :user_route_traces, dependent: :destroy
 end

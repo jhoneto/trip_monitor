@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_04_131036) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_06_003638) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "postgis"
@@ -80,6 +80,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_04_131036) do
     t.index ["company_id"], name: "index_kitetrips_on_company_id"
   end
 
+  create_table "user_route_traces", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "kitetrip_route_id", null: false
+    t.decimal "latitude", precision: 10, scale: 8
+    t.decimal "longitude", precision: 11, scale: 8
+    t.json "metadata"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["kitetrip_route_id"], name: "index_user_route_traces_on_kitetrip_route_id"
+    t.index ["user_id"], name: "index_user_route_traces_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -107,4 +119,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_04_131036) do
   add_foreign_key "kitetrip_participants", "users"
   add_foreign_key "kitetrip_routes", "kitetrips"
   add_foreign_key "kitetrips", "companies"
+  add_foreign_key "user_route_traces", "kitetrip_routes"
+  add_foreign_key "user_route_traces", "users"
 end
