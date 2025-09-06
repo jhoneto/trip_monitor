@@ -1,9 +1,14 @@
 class Api::V1::BaseController < ActionController::API
   before_action :authenticate_user!
+  before_action :ensure_json_request
 
   respond_to :json
 
   private
+
+  def ensure_json_request
+    request.format = :json
+  end
 
   def authenticate_user!
     token = request.headers["Authorization"]&.split(" ")&.last
