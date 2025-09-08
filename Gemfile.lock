@@ -53,6 +53,9 @@ GEM
       activemodel (= 8.0.2.1)
       activesupport (= 8.0.2.1)
       timeout (>= 0.4.0)
+    activerecord-postgis-adapter (11.0.0)
+      activerecord (~> 8.0.0)
+      rgeo-activerecord (~> 8.0.0)
     activestorage (8.0.2.1)
       actionpack (= 8.0.2.1)
       activejob (= 8.0.2.1)
@@ -75,7 +78,14 @@ GEM
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.3)
+    async (2.28.1)
+      console (~> 1.29)
+      fiber-annotation
+      io-event (~> 1.11)
+      metrics (~> 0.12)
+      traces (~> 0.18)
     base64 (0.3.0)
+    bcrypt (3.1.20)
     bcrypt_pbkdf (1.1.1)
     benchmark (0.4.1)
     bigdecimal (3.2.2)
@@ -85,6 +95,7 @@ GEM
     brakeman (7.1.0)
       racc
     builder (3.3.0)
+    byebug (12.0.0)
     capybara (3.40.0)
       addressable
       matrix
@@ -94,20 +105,104 @@ GEM
       rack-test (>= 0.6.3)
       regexp_parser (>= 1.5, < 3.0)
       xpath (~> 3.2)
+    claude-code-sdk-ruby (0.1.6)
+      async (~> 2)
+      logger (~> 1)
+    claude-on-rails (0.2.0)
+      claude_swarm (~> 0.1)
+      rails (>= 6.0)
+    claude_swarm (0.3.11)
+      claude-code-sdk-ruby (~> 0.1)
+      faraday-net_http_persistent (~> 2.0)
+      faraday-retry (~> 2.0)
+      fast-mcp-annotations (~> 1.5)
+      ruby-mcp-client (~> 0.7)
+      ruby-openai (>= 7.0, < 9.0)
+      thor (~> 1.3)
+      zeitwerk (~> 2.6)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.4)
+    console (1.33.0)
+      fiber-annotation
+      fiber-local (~> 1.1)
+      json
     crass (1.0.6)
     date (3.4.1)
     debug (1.11.0)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    devise (4.9.4)
+      bcrypt (~> 3.0)
+      orm_adapter (~> 0.1)
+      railties (>= 4.1.0)
+      responders
+      warden (~> 1.2.3)
     dotenv (3.1.8)
+    dotenv-rails (3.1.8)
+      dotenv (= 3.1.8)
+      railties (>= 6.1)
     drb (2.2.3)
+    dry-configurable (1.3.0)
+      dry-core (~> 1.1)
+      zeitwerk (~> 2.6)
+    dry-core (1.1.0)
+      concurrent-ruby (~> 1.0)
+      logger
+      zeitwerk (~> 2.6)
+    dry-inflector (1.2.0)
+    dry-initializer (3.2.0)
+    dry-logic (1.6.0)
+      bigdecimal
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.1)
+      zeitwerk (~> 2.6)
+    dry-schema (1.14.1)
+      concurrent-ruby (~> 1.0)
+      dry-configurable (~> 1.0, >= 1.0.1)
+      dry-core (~> 1.1)
+      dry-initializer (~> 3.2)
+      dry-logic (~> 1.5)
+      dry-types (~> 1.8)
+      zeitwerk (~> 2.6)
+    dry-types (1.8.3)
+      bigdecimal (~> 3.0)
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.0)
+      dry-inflector (~> 1.0)
+      dry-logic (~> 1.4)
+      zeitwerk (~> 2.6)
     ed25519 (1.4.0)
     erb (5.0.2)
     erubi (1.13.1)
     et-orbi (1.3.0)
       tzinfo
+    event_stream_parser (1.0.0)
+    faraday (2.13.4)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-follow_redirects (0.3.0)
+      faraday (>= 1, < 3)
+    faraday-multipart (1.1.1)
+      multipart-post (~> 2.0)
+    faraday-net_http (3.4.1)
+      net-http (>= 0.5.0)
+    faraday-net_http_persistent (2.3.1)
+      faraday (~> 2.5)
+      net-http-persistent (>= 4.0.4, < 5)
+    faraday-retry (2.3.2)
+      faraday (~> 2.0)
+    fast-mcp-annotations (1.5.2)
+      addressable (~> 2.8)
+      base64
+      dry-schema (~> 1.14)
+      json (~> 2.0)
+      mime-types (~> 3.4)
+      rack (~> 3.1)
+    fiber-annotation (0.2.0)
+    fiber-local (1.1.0)
+      fiber-storage
+    fiber-storage (1.0.1)
     fugit (1.11.2)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
@@ -120,6 +215,7 @@ GEM
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
     io-console (0.8.1)
+    io-event (1.13.0)
     irb (1.15.2)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
@@ -128,6 +224,8 @@ GEM
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
     json (2.13.2)
+    jwt (3.1.2)
+      base64
     kamal (2.7.0)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -152,9 +250,19 @@ GEM
       net-smtp
     marcel (1.0.4)
     matrix (0.4.3)
+    metrics (0.14.0)
+    mime-types (3.7.0)
+      logger
+      mime-types-data (~> 3.2025, >= 3.2025.0507)
+    mime-types-data (3.2025.0826)
     mini_mime (1.1.5)
     minitest (5.25.5)
     msgpack (1.8.0)
+    multipart-post (2.4.1)
+    net-http (0.6.0)
+      uri
+    net-http-persistent (4.0.6)
+      connection_pool (~> 2.2, >= 2.2.4)
     net-imap (0.5.10)
       date
       net-protocol
@@ -182,6 +290,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.9-x86_64-linux-musl)
       racc (~> 1.4)
+    orm_adapter (0.5.0)
     ostruct (0.6.3)
     parallel (1.27.0)
     parser (3.3.9.0)
@@ -209,6 +318,9 @@ GEM
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.1)
+    rack-cors (3.0.0)
+      logger
+      rack (>= 3.0.14)
     rack-session (2.1.1)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -253,7 +365,14 @@ GEM
     regexp_parser (2.11.2)
     reline (0.6.2)
       io-console (~> 0.5)
+    responders (3.1.1)
+      actionpack (>= 5.2)
+      railties (>= 5.2)
     rexml (3.4.2)
+    rgeo (3.0.1)
+    rgeo-activerecord (8.0.0)
+      activerecord (>= 7.0)
+      rgeo (>= 3.0)
     rubocop (1.80.1)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -282,6 +401,14 @@ GEM
       rubocop (>= 1.72)
       rubocop-performance (>= 1.24)
       rubocop-rails (>= 2.30)
+    ruby-mcp-client (0.7.3)
+      faraday (~> 2.0)
+      faraday-follow_redirects (~> 0.3)
+      faraday-retry (~> 2.0)
+    ruby-openai (8.3.0)
+      event_stream_parser (>= 0.3.0, < 2.0.0)
+      faraday (>= 1)
+      faraday-multipart (>= 1)
     ruby-progressbar (1.13.0)
     rubyzip (3.0.2)
     securerandom (0.4.1)
@@ -317,11 +444,20 @@ GEM
     stimulus-rails (1.3.4)
       railties (>= 6.0.0)
     stringio (3.1.7)
+    tailwindcss-rails (4.3.0)
+      railties (>= 7.0.0)
+      tailwindcss-ruby (~> 4.0)
+    tailwindcss-ruby (4.1.12)
+    tailwindcss-ruby (4.1.12-aarch64-linux-gnu)
+    tailwindcss-ruby (4.1.12-aarch64-linux-musl)
+    tailwindcss-ruby (4.1.12-x86_64-linux-gnu)
+    tailwindcss-ruby (4.1.12-x86_64-linux-musl)
     thor (1.4.0)
     thruster (0.1.15)
     thruster (0.1.15-aarch64-linux)
     thruster (0.1.15-x86_64-linux)
     timeout (0.4.3)
+    traces (0.18.1)
     turbo-rails (2.0.16)
       actionpack (>= 7.1.0)
       railties (>= 7.1.0)
@@ -332,6 +468,8 @@ GEM
     unicode-emoji (4.0.4)
     uri (1.0.3)
     useragent (0.16.11)
+    warden (1.2.9)
+      rack (>= 2.0.9)
     web-console (4.2.1)
       actionview (>= 6.0.0)
       activemodel (>= 6.0.0)
@@ -357,16 +495,23 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  activerecord-postgis-adapter
   bootsnap
   brakeman
+  byebug
   capybara
+  claude-on-rails
   debug
+  devise
+  dotenv-rails
   importmap-rails
   jbuilder
+  jwt
   kamal
   pg (~> 1.1)
   propshaft
   puma (>= 5.0)
+  rack-cors
   rails (~> 8.0.2)
   rubocop-rails-omakase
   selenium-webdriver
@@ -374,6 +519,7 @@ DEPENDENCIES
   solid_cache
   solid_queue
   stimulus-rails
+  tailwindcss-rails
   thruster
   turbo-rails
   tzinfo-data

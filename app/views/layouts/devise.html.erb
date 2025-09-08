@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Trip Monitor" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-gray-50">
+    <div class="min-h-screen flex">
+      <!-- Left side - Image (hidden on mobile) -->
+      <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 relative overflow-hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div class="relative z-10 flex flex-col justify-center items-center text-white p-12">
+          <div class="max-w-md text-center">
+            <h1 class="text-4xl font-bold mb-6">Trip Monitor</h1>
+            <p class="text-xl mb-8 text-blue-100">
+              Sistema completo de monitoramento e gestão de viagens
+            </p>
+            <div class="space-y-4 text-left">
+              <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Rastreamento em tempo real</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Gestão de participantes</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Relatórios detalhados</span>
+              </div>
+              <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Controle de rotas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Decorative pattern -->
+        <div class="absolute top-0 right-0 -mt-8 -mr-8 w-96 h-96 opacity-10">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <path fill="currentColor" d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-45.8C87.4,-32.6,90,-16.3,89.4,-0.5C88.8,15.3,85,30.6,77.9,44.2C70.8,57.8,60.4,69.7,47.4,76.8C34.4,83.9,19.8,86.2,4.6,79.9C-10.6,73.6,-26.8,58.7,-40.3,42.4C-53.8,26.1,-64.6,8.4,-69.1,-12.1C-73.6,-32.6,-71.8,-55.9,-60.9,-64.4C-50,-72.9,-30,-66.6,-11.8,-69.8C6.4,-73,25.6,-85.7,44.7,-76.4Z" transform="translate(100 100)" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Right side - Login Form -->
+      <div class="w-full lg:w-1/2 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+          <!-- Mobile Logo (shown only on mobile) -->
+          <div class="text-center lg:hidden">
+            <h2 class="text-3xl font-extrabold text-gray-900">
+              Trip Monitor
+            </h2>
+            <p class="mt-2 text-sm text-gray-600">
+              Sistema de monitoramento de viagens
+            </p>
+          </div>
+
+          <!-- Flash messages -->
+          <% if notice %>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+              <%= notice %>
+            </div>
+          <% end %>
+          <% if alert %>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              <%= alert %>
+            </div>
+          <% end %>
+
+          <!-- Content -->
+          <div class="bg-white py-8 px-6 shadow-lg rounded-lg lg:shadow-xl">
+            <%= yield %>
+          </div>
+
+          <!-- Footer -->
+          <div class="text-center text-sm text-gray-500">
+            <p>&copy; <%= Date.current.year %> Trip Monitor. Todos os direitos reservados.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,156 @@
+<% content_for :title, @kitetrip_route.name || "Rota da Viagem" %>
+
+<div class="max-w-7xl mx-auto">
+  <% if notice.present? %>
+    <p class="py-2 px-3 bg-green-50 mb-5 text-green-500 font-medium rounded-md inline-block" id="notice"><%= notice %></p>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Route Details -->
+    <div class="lg:col-span-1">
+      <div class="bg-white p-6 rounded-lg shadow-sm border">
+        <h1 class="font-bold text-2xl text-gray-800 mb-6">
+          <%= @kitetrip_route.name || "Rota da Viagem" %>
+        </h1>
+
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm font-medium text-gray-600">Viagem</label>
+            <p class="text-gray-900"><%= @kitetrip.name %></p>
+          </div>
+
+          <% if @kitetrip_route.description.present? %>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Descrição</label>
+              <p class="text-gray-900"><%= simple_format(@kitetrip_route.description) %></p>
+            </div>
+          <% end %>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium text-gray-600">Data Início</label>
+              <p class="text-gray-900">
+                <%= @kitetrip_route.start_date&.strftime("%d/%m/%Y às %H:%M") || "Não definida" %>
+              </p>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Data Fim</label>
+              <p class="text-gray-900">
+                <%= @kitetrip_route.end_date&.strftime("%d/%m/%Y às %H:%M") || "Não definida" %>
+              </p>
+            </div>
+          </div>
+
+          <!-- Route Statistics -->
+          <div class="bg-gray-50 p-4 rounded-md">
+            <h3 class="font-medium text-gray-800 mb-3">Estatísticas da Rota</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="text-gray-600">Pontos:</span>
+                <span class="font-medium"><%= @kitetrip_route.points_count %></span>
+              </div>
+              <div>
+                <span class="text-gray-600">Distância:</span>
+                <span class="font-medium">
+                  <% if @kitetrip_route.route_coordinates.any? %>
+                    <%= @kitetrip_route.distance_km %> km
+                  <% else %>
+                    -
+                  <% end %>
+                </span>
+              </div>
+              <div>
+                <span class="text-gray-600">Início:</span>
+                <span class="font-medium">
+                  <% if @kitetrip_route.start_coordinates %>
+                    <%= @kitetrip_route.start_coordinates.map { |c| c.round(4) }.join(", ") %>
+                  <% else %>
+                    -
+                  <% end %>
+                </span>
+              </div>
+              <div>
+                <span class="text-gray-600">Fim:</span>
+                <span class="font-medium">
+                  <% if @kitetrip_route.end_coordinates %>
+                    <%= @kitetrip_route.end_coordinates.map { |c| c.round(4) }.join(", ") %>
+                  <% else %>
+                    -
+                  <% end %>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col space-y-2">
+            <%= link_to "Editar Rota", edit_kitetrip_kitetrip_route_path(@kitetrip, @kitetrip_route), 
+                class: "w-full text-center rounded-md px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium" %>
+            
+            <%= link_to "Todas as Rotas", kitetrip_kitetrip_routes_path(@kitetrip), 
+                class: "w-full text-center rounded-md px-4 py-2 bg-gray-100 hover:bg-gray-50 text-gray-700 font-medium" %>
+            
+            <%= link_to "Voltar para #{@kitetrip.name}", @kitetrip, 
+                class: "w-full text-center rounded-md px-4 py-2 bg-gray-100 hover:bg-gray-50 text-gray-700 font-medium" %>
+            
+            <%= button_to "Excluir Rota", [@kitetrip, @kitetrip_route], method: :delete, 
+                class: "w-full rounded-md px-4 py-2 text-white bg-red-600 hover:bg-red-500 font-medium cursor-pointer", 
+                data: { turbo_confirm: "Tem certeza que deseja excluir esta rota?" } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Route Map -->
+    <div class="lg:col-span-2">
+      <div class="bg-white p-6 rounded-lg shadow-sm border">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-medium text-gray-800">Visualização da Rota</h2>
+          <div class="text-sm text-gray-500">
+            <% if @kitetrip_route.route_coordinates.any? %>
+              <%= @kitetrip_route.points_count %> pontos
+            <% else %>
+              Nenhuma rota definida
+            <% end %>
+          </div>
+        </div>
+        
+        <% if @kitetrip_route.route_coordinates.any? %>
+          <div data-controller="map"
+               data-map-initial-coordinates-value="<%= @kitetrip_route.route_coordinates.to_json %>"
+               data-map-readonly-value="true"
+               <% if @kitetrip_route.center_point %>
+                 data-map-center-value="<%= @kitetrip_route.center_point.to_json %>"
+               <% else %>
+                 data-map-center-value="[-38.5434, -3.7319]"
+               <% end %>
+               data-map-zoom-value="12"
+               class="relative">
+            
+            <div data-map-target="container" 
+                 class="w-full h-96 rounded-md border border-gray-300"></div>
+            
+            <div class="mt-3 flex justify-between items-center text-sm text-gray-600">
+              <span>🗺️ OpenStreetMap</span>
+              <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                Visualização somente leitura
+              </span>
+            </div>
+          </div>
+        <% else %>
+          <div class="w-full h-96 bg-gray-100 rounded-md border border-gray-300 flex items-center justify-center">
+            <div class="text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              <h3 class="text-lg font-medium text-gray-800 mb-2">Nenhuma rota definida</h3>
+              <p class="text-gray-600 mb-4">Esta rota ainda não possui pontos de GPS definidos.</p>
+              <%= link_to "Definir Rota", edit_kitetrip_kitetrip_route_path(@kitetrip, @kitetrip_route), 
+                  class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
