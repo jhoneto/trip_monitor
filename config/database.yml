@@ -89,9 +89,13 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: trip_monitor_production
-    username: trip_monitor
+    database: <%= ENV["PGDATABASE"] || "trip_monitor_production" %>
+    host: <%= ENV["PGHOST"] || "trip_monitor-db" %>
+    port: <%= ENV["PGPORT"] || 5432 %>
+    username: <%= ENV["PGUSER"] || "trip_monitor" %>
     password: <%= ENV["TRIP_MONITOR_DATABASE_PASSWORD"] %>
+    # Force TCP connection
+    prepared_statements: false
   cache:
     <<: *primary_production
     database: trip_monitor_production_cache

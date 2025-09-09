@@ -1,0 +1,4 @@
+CREATE DATABASE trip_monitor_production;
+CREATE DATABASE trip_monitor_production_cache;
+CREATE DATABASE trip_monitor_production_queue;
+CREATE DATABASE trip_monitor_production_cable;
