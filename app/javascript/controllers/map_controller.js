@@ -18,6 +18,7 @@ export default class extends Controller {
 
     this.initializeMap()
     this.loadInitialRoute()
+    this.setupEventListeners()
   }
 
   disconnect() {
@@ -71,8 +72,8 @@ export default class extends Controller {
       <div class="text-center">
         <strong>Ponto ${markerIndex + 1}</strong><br>
         <small>Lat: ${latlng.lat.toFixed(5)}<br>Lng: ${latlng.lng.toFixed(5)}</small><br>
-        <button class="mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600" 
-                onclick="this.closest('.leaflet-popup').map.fire('remove-point', {index: ${markerIndex}})">
+        <button type="button" class="mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                data-remove-point-index="${markerIndex}">
           Remover Ponto
         </button>
       </div>
@@ -117,8 +118,8 @@ export default class extends Controller {
           <div class="text-center">
             <strong>Ponto ${idx + 1}</strong><br>
             <small>Lat: ${latlng.lat.toFixed(5)}<br>Lng: ${latlng.lng.toFixed(5)}</small><br>
-            <button class="mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600" 
-                    onclick="event.target.dispatchEvent(new CustomEvent('remove-point', {bubbles: true, detail: {index: ${idx}}}))">
+            <button type="button" class="mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                    data-remove-point-index="${idx}">
               Remover Ponto
             </button>
           </div>
@@ -181,8 +182,8 @@ export default class extends Controller {
             <div class="text-center">
               <strong>Ponto ${index + 1}</strong><br>
               <small>Lat: ${latlng.lat.toFixed(5)}<br>Lng: ${latlng.lng.toFixed(5)}</small><br>
-              <button class="mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600" 
-                      onclick="event.target.dispatchEvent(new CustomEvent('remove-point', {bubbles: true, detail: {index: ${index}}}))">
+              <button type="button" class="mt-2 px-2 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600"
+                      data-remove-point-index="${index}">
                 Remover Ponto
               </button>
             </div>
@@ -237,13 +238,18 @@ export default class extends Controller {
     this.updateHiddenField()
   }
 
-  // Handle remove point events bubbled up from popups
-  handleEvent(event) {
-    if (event.type === 'remove-point' || event.detail?.type === 'remove-point') {
-      const index = event.detail?.index
-      if (typeof index === 'number') {
-        this.removeRoutePoint(index)
+  setupEventListeners() {
+    // Use event delegation to handle remove point clicks
+    this.element.addEventListener('click', (event) => {
+      if (event.target.hasAttribute('data-remove-point-index')) {
+        event.preventDefault()
+        event.stopPropagation()
+
+        const index = parseInt(event.target.getAttribute('data-remove-point-index'))
+        if (!isNaN(index)) {
+          this.removeRoutePoint(index)
+        }
       }
-    }
+    })
   }
 }
