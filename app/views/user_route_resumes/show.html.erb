@@ -29,39 +29,23 @@
       <div class="lg:col-span-2">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900">Trajeto Executado</h2>
-            <p class="text-sm text-gray-600">Rota percorrida baseada nos pontos de rastreamento</p>
-          </div>
-
-          <div data-controller="map"
-               data-map-center-value="<%= (begin
-                 bounds = @user_route_resume.bounds
-                 if bounds&.dig(:southwest) && bounds&.dig(:northeast)
-                   sw = bounds[:southwest]
-                   ne = bounds[:northeast]
-                   [(sw[0] + ne[0]) / 2.0, (sw[1] + ne[1]) / 2.0]
-                 else
-                   [-38.5434, -3.7319]
-                 end
-               end).to_json %>"
-               data-map-zoom-value="13"
-               data-map-readonly-value="true"
-               data-map-initial-coordinates-value="<%= @user_route_resume.executed_route_coordinates.to_json %>">
-            <div data-map-target="container" class="h-96 w-full"></div>
-          </div>
-        </div>
-
-        <!-- Rota Original vs Executada -->
-        <% if @kitetrip_route.route_coordinates.any? %>
-          <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
-              <h2 class="text-lg font-semibold text-gray-900">Comparação de Rotas</h2>
-              <p class="text-sm text-gray-600">Rota planejada vs rota executada</p>
+            <h2 class="text-lg font-semibold text-gray-900">Comparação de Rotas</h2>
+            <p class="text-sm text-gray-600">Rota planejada vs rota executada</p>
+            <!-- Legenda -->
+            <div class="mt-3 flex items-center space-x-4 text-sm">
+              <div class="flex items-center">
+                <div class="w-6 h-4 bg-red-500 mr-2 rounded"></div>
+                <span class="text-gray-600">Rota Planejada</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-6 h-4 bg-blue-500 mr-2 rounded"></div>
+                <span class="text-gray-600">Rota Executada</span>
+              </div>
             </div>
-
-            <div id="comparison-map" class="h-96 w-full"></div>
           </div>
-        <% end %>
+
+          <div id="route-comparison-map" class="h-96 w-full"></div>
+        </div>
       </div>
 
       <!-- Métricas e Resumo -->
@@ -198,81 +182,77 @@
   </div>
 </div>
 
-<% if @kitetrip_route.route_coordinates.any? %>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Wait a bit for the page to load completely
-      setTimeout(() => {
-        const comparisonMapElement = document.getElementById('comparison-map');
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for the page to load completely
+    setTimeout(() => {
+      const mapElement = document.getElementById('route-comparison-map');
 
-        if (comparisonMapElement) {
-          // Calculate center point
-          const bounds = <%= raw((@user_route_resume.bounds || {}).to_json) %>;
-          const center = bounds && bounds.southwest && bounds.northeast ?
-            [(bounds.southwest[1] + bounds.northeast[1]) / 2, (bounds.southwest[0] + bounds.northeast[0]) / 2] :
-            [-3.7319, -38.5434];
+      if (mapElement) {
+        // Calculate center point
+        const executedCoords = <%= raw(@user_route_resume.executed_route_coordinates.to_json) %>;
+        <% if @kitetrip_route.route_coordinates.any? %>
+        const plannedCoords = <%= raw(@kitetrip_route.route_coordinates.to_json) %>;
+        <% else %>
+        const plannedCoords = [];
+        <% end %>
 
-          // Initialize comparison map
-          const comparisonMap = L.map(comparisonMapElement).setView(center, 13);
+        // Calculate center from all available coordinates
+        let allCoords = [...executedCoords];
+        if (plannedCoords.length > 0) {
+          allCoords = [...allCoords, ...plannedCoords];
+        }
 
-          // Add tile layer
-          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          }).addTo(comparisonMap);
+        const center = allCoords.length > 0 ?
+          [allCoords[0][1], allCoords[0][0]] :
+          [-3.7319, -38.5434];
 
-          // Add planned route in blue (dashed)
-          const plannedCoords = <%= raw(@kitetrip_route.route_coordinates.to_json) %>;
+        // Initialize map
+        const map = L.map(mapElement).setView(center, 13);
+
+        // Add tile layer
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        <% if @kitetrip_route.route_coordinates.any? %>
+        // Add planned route in red
+        if (plannedCoords.length > 0) {
           const plannedLatLngs = plannedCoords.map(coord => [coord[1], coord[0]]);
-
-          const plannedRoute = L.polyline(plannedLatLngs, {
-            color: '#3B82F6',
-            weight: 4,
-            opacity: 0.8,
-            dashArray: '10, 10'
-          }).addTo(comparisonMap);
-
-          // Add executed route in red (solid)
-          const executedCoords = <%= raw(@user_route_resume.executed_route_coordinates.to_json) %>;
-          const executedLatLngs = executedCoords.map(coord => [coord[1], coord[0]]);
-
-          const executedRoute = L.polyline(executedLatLngs, {
+          L.polyline(plannedLatLngs, {
             color: '#EF4444',
             weight: 4,
-            opacity: 0.9
-          }).addTo(comparisonMap);
-
-          // Add legend
-          const legend = L.control({position: 'topright'});
-          legend.onAdd = function (map) {
-            const div = L.DomUtil.create('div', 'legend-control');
-            div.style.backgroundColor = 'white';
-            div.style.padding = '10px';
-            div.style.borderRadius = '5px';
-            div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-            div.style.fontSize = '12px';
-            div.innerHTML = `
-              <div style="font-weight: bold; margin-bottom: 8px;">Legenda</div>
-              <div style="display: flex; align-items: center; margin-bottom: 4px;">
-                <div style="width: 20px; height: 3px; background: #3B82F6; border: 1px dashed #3B82F6; margin-right: 8px;"></div>
-                <span>Rota Planejada</span>
-              </div>
-              <div style="display: flex; align-items: center;">
-                <div style="width: 20px; height: 3px; background: #EF4444; margin-right: 8px;"></div>
-                <span>Rota Executada</span>
-              </div>
-            `;
-            return div;
-          };
-          legend.addTo(comparisonMap);
-
-          // Fit map to show both routes
-          const allLatLngs = [...plannedLatLngs, ...executedLatLngs];
-          if (allLatLngs.length > 0) {
-            comparisonMap.fitBounds(allLatLngs, { padding: [20, 20] });
-          }
+            opacity: 0.8
+          }).addTo(map);
         }
-      }, 1500);
-    });
-  </script>
-<% end %>
+        <% end %>
+
+        // Add executed route in blue
+        if (executedCoords.length > 0) {
+          const executedLatLngs = executedCoords.map(coord => [coord[1], coord[0]]);
+          L.polyline(executedLatLngs, {
+            color: '#3B82F6',
+            weight: 4,
+            opacity: 0.9
+          }).addTo(map);
+        }
+
+        // Fit map to show all routes
+        const allLatLngs = [];
+        if (executedCoords.length > 0) {
+          allLatLngs.push(...executedCoords.map(coord => [coord[1], coord[0]]));
+        }
+        <% if @kitetrip_route.route_coordinates.any? %>
+        if (plannedCoords.length > 0) {
+          allLatLngs.push(...plannedCoords.map(coord => [coord[1], coord[0]]));
+        }
+        <% end %>
+
+        if (allLatLngs.length > 0) {
+          map.fitBounds(allLatLngs, { padding: [20, 20] });
+        }
+      }
+    }, 1000);
+  });
+</script>
