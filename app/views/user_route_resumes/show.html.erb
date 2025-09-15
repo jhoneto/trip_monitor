@@ -1,0 +1,278 @@
+<% content_for :title, "Resumo da Rota - #{@kitetrip_route.name}" %>
+
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="py-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900"><%= @kitetrip_route.name %></h1>
+            <div class="mt-1 flex items-center space-x-4 text-sm text-gray-600">
+              <span>Kitetrip: <%= @kitetrip.name %></span>
+              <span>•</span>
+              <span>Participante: <%= @user.email %></span>
+              <span>•</span>
+              <span>Processado em: <%= @user_route_resume.created_at.strftime("%d/%m/%Y às %H:%M") %></span>
+            </div>
+          </div>
+          <%= link_to "Voltar", kitetrip_kitetrip_participants_path(@kitetrip),
+                      class: "inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Mapa -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Trajeto Executado</h2>
+            <p class="text-sm text-gray-600">Rota percorrida baseada nos pontos de rastreamento</p>
+          </div>
+
+          <div data-controller="map"
+               data-map-center-value="<%= (begin
+                 bounds = @user_route_resume.bounds
+                 if bounds&.dig(:southwest) && bounds&.dig(:northeast)
+                   sw = bounds[:southwest]
+                   ne = bounds[:northeast]
+                   [(sw[0] + ne[0]) / 2.0, (sw[1] + ne[1]) / 2.0]
+                 else
+                   [-38.5434, -3.7319]
+                 end
+               end).to_json %>"
+               data-map-zoom-value="13"
+               data-map-readonly-value="true"
+               data-map-initial-coordinates-value="<%= @user_route_resume.executed_route_coordinates.to_json %>">
+            <div data-map-target="container" class="h-96 w-full"></div>
+          </div>
+        </div>
+
+        <!-- Rota Original vs Executada -->
+        <% if @kitetrip_route.route_coordinates.any? %>
+          <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+              <h2 class="text-lg font-semibold text-gray-900">Comparação de Rotas</h2>
+              <p class="text-sm text-gray-600">Rota planejada vs rota executada</p>
+            </div>
+
+            <div id="comparison-map" class="h-96 w-full"></div>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Métricas e Resumo -->
+      <div class="space-y-6">
+        <!-- Métricas Principais -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Métricas da Rota</h2>
+          </div>
+          <div class="p-6 space-y-6">
+            <!-- Distância -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-gray-900">Distância Total</p>
+                  <p class="text-xs text-gray-500">Distância percorrida</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-gray-900"><%= @user_route_resume.total_distance %> km</p>
+              </div>
+            </div>
+
+            <!-- Tempo Total -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-gray-900">Tempo Total</p>
+                  <p class="text-xs text-gray-500">Duração da atividade</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-gray-900"><%= @user_route_resume.formatted_total_time %></p>
+              </div>
+            </div>
+
+            <!-- Velocidade Média -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-gray-900">Velocidade Média</p>
+                  <p class="text-xs text-gray-500">Velocidade média da rota</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-gray-900"><%= @user_route_resume.average_speed %> km/h</p>
+              </div>
+            </div>
+
+            <!-- Velocidade Máxima -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm font-medium text-gray-900">Velocidade Máxima</p>
+                  <p class="text-xs text-gray-500">Maior velocidade atingida</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-bold text-gray-900"><%= @user_route_resume.max_speed %> km/h</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informações Adicionais -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Informações</h2>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <p class="text-sm font-medium text-gray-900">Pontos de Rastreamento</p>
+              <p class="text-sm text-gray-600"><%= @user_route_resume.points_count %> pontos coletados</p>
+            </div>
+
+            <% if @kitetrip_route.route_coordinates.any? %>
+              <div>
+                <p class="text-sm font-medium text-gray-900">Rota Planejada</p>
+                <p class="text-sm text-gray-600"><%= @kitetrip_route.distance_km %> km planejados</p>
+              </div>
+
+              <div>
+                <p class="text-sm font-medium text-gray-900">Aderência à Rota</p>
+                <%
+                  planned_distance = @kitetrip_route.distance_km || 0
+                  executed_distance = @user_route_resume.total_distance || 0
+                  adherence = planned_distance > 0 ? ((executed_distance / planned_distance) * 100).round(1) : 0
+                %>
+                <p class="text-sm text-gray-600"><%= adherence %>% da rota planejada</p>
+              </div>
+            <% end %>
+
+            <div>
+              <p class="text-sm font-medium text-gray-900">Data de Processamento</p>
+              <p class="text-sm text-gray-600"><%= @user_route_resume.created_at.strftime("%d de %B de %Y às %H:%M") %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div class="p-6">
+            <button onclick="window.print()"
+                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+              </svg>
+              Imprimir Relatório
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if @kitetrip_route.route_coordinates.any? %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait a bit for the page to load completely
+      setTimeout(() => {
+        const comparisonMapElement = document.getElementById('comparison-map');
+
+        if (comparisonMapElement) {
+          // Calculate center point
+          const bounds = <%= raw((@user_route_resume.bounds || {}).to_json) %>;
+          const center = bounds && bounds.southwest && bounds.northeast ?
+            [(bounds.southwest[1] + bounds.northeast[1]) / 2, (bounds.southwest[0] + bounds.northeast[0]) / 2] :
+            [-3.7319, -38.5434];
+
+          // Initialize comparison map
+          const comparisonMap = L.map(comparisonMapElement).setView(center, 13);
+
+          // Add tile layer
+          L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          }).addTo(comparisonMap);
+
+          // Add planned route in blue (dashed)
+          const plannedCoords = <%= raw(@kitetrip_route.route_coordinates.to_json) %>;
+          const plannedLatLngs = plannedCoords.map(coord => [coord[1], coord[0]]);
+
+          const plannedRoute = L.polyline(plannedLatLngs, {
+            color: '#3B82F6',
+            weight: 4,
+            opacity: 0.8,
+            dashArray: '10, 10'
+          }).addTo(comparisonMap);
+
+          // Add executed route in red (solid)
+          const executedCoords = <%= raw(@user_route_resume.executed_route_coordinates.to_json) %>;
+          const executedLatLngs = executedCoords.map(coord => [coord[1], coord[0]]);
+
+          const executedRoute = L.polyline(executedLatLngs, {
+            color: '#EF4444',
+            weight: 4,
+            opacity: 0.9
+          }).addTo(comparisonMap);
+
+          // Add legend
+          const legend = L.control({position: 'topright'});
+          legend.onAdd = function (map) {
+            const div = L.DomUtil.create('div', 'legend-control');
+            div.style.backgroundColor = 'white';
+            div.style.padding = '10px';
+            div.style.borderRadius = '5px';
+            div.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+            div.style.fontSize = '12px';
+            div.innerHTML = `
+              <div style="font-weight: bold; margin-bottom: 8px;">Legenda</div>
+              <div style="display: flex; align-items: center; margin-bottom: 4px;">
+                <div style="width: 20px; height: 3px; background: #3B82F6; border: 1px dashed #3B82F6; margin-right: 8px;"></div>
+                <span>Rota Planejada</span>
+              </div>
+              <div style="display: flex; align-items: center;">
+                <div style="width: 20px; height: 3px; background: #EF4444; margin-right: 8px;"></div>
+                <span>Rota Executada</span>
+              </div>
+            `;
+            return div;
+          };
+          legend.addTo(comparisonMap);
+
+          // Fit map to show both routes
+          const allLatLngs = [...plannedLatLngs, ...executedLatLngs];
+          if (allLatLngs.length > 0) {
+            comparisonMap.fitBounds(allLatLngs, { padding: [20, 20] });
+          }
+        }
+      }, 1500);
+    });
+  </script>
+<% end %>

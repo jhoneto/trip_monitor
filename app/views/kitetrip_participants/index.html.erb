@@ -42,11 +42,18 @@
                 </div>
               </div>
             </div>
-            <button onclick="removeParticipant(<%= participant.id %>)" class="text-red-600 hover:text-red-800 focus:outline-none">
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-              </svg>
-            </button>
+            <div class="flex items-center space-x-2">
+              <button onclick="showRouteResumes(<%= participant.user.id %>)" class="text-blue-600 hover:text-blue-800 focus:outline-none" title="Ver resumos de rotas">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+              </button>
+              <button onclick="removeParticipant(<%= participant.id %>)" class="text-red-600 hover:text-red-800 focus:outline-none">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
           </div>
         <% end %>
       </div>
@@ -116,6 +123,33 @@
   </div>
 </div>
 
+<!-- Modal para visualizar resumos de rotas -->
+<div id="route-resumes-modal" class="fixed inset-0 bg-gray-900 bg-opacity-30 hidden flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden max-h-[90vh]">
+    <!-- Header do Modal -->
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+      <div class="flex items-center justify-between">
+        <h3 class="text-xl font-semibold text-gray-900">Resumos de Rotas</h3>
+        <button id="close-resumes-modal" class="text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full p-2 transition-colors duration-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <p id="user-email-display" class="text-sm text-gray-600 mt-1"></p>
+    </div>
+
+    <!-- Conteúdo do Modal -->
+    <div class="p-6 overflow-y-auto max-h-[70vh]">
+      <div id="route-resumes-content">
+        <div class="flex items-center justify-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const modal = document.getElementById('participant-modal');
 const addParticipantBtn = document.getElementById('add-participant-btn');
@@ -124,6 +158,12 @@ const cancelBtn = document.getElementById('cancel-btn');
 const form = document.getElementById('add-participant-form');
 const emailInput = document.getElementById('user-email');
 const emailSuggestions = document.getElementById('email-suggestions');
+
+// Elements for route resumes modal
+const routeResumesModal = document.getElementById('route-resumes-modal');
+const closeResumesModal = document.getElementById('close-resumes-modal');
+const userEmailDisplay = document.getElementById('user-email-display');
+const routeResumesContent = document.getElementById('route-resumes-content');
 
 // Abrir modal
 addParticipantBtn.addEventListener('click', () => {
@@ -283,5 +323,113 @@ function updateRole(participantId, newRole) {
     console.error('Erro:', error);
     alert('Erro ao alterar função');
   });
+}
+
+// Fechar modal de resumos
+closeResumesModal.addEventListener('click', () => {
+  routeResumesModal.classList.add('hidden');
+});
+
+// Fechar modal de resumos clicando fora
+window.addEventListener('click', (event) => {
+  if (event.target === routeResumesModal) {
+    routeResumesModal.classList.add('hidden');
+  }
+});
+
+// Mostrar resumos de rotas
+function showRouteResumes(userId) {
+  // Buscar o email do usuário na lista de participantes
+  const participantDiv = document.querySelector(`[data-participant-id]`);
+  const userEmail = document.querySelector(`div[data-participant-id] p.text-sm.font-medium.text-gray-900`);
+
+  // Encontrar o email correto para este userId
+  let foundEmail = 'Usuário';
+  const allParticipants = document.querySelectorAll('[data-participant-id]');
+  for (let participant of allParticipants) {
+    const emailElement = participant.querySelector('p.text-sm.font-medium.text-gray-900');
+    if (emailElement && participant.querySelector(`button[onclick*="${userId}"]`)) {
+      foundEmail = emailElement.textContent;
+      break;
+    }
+  }
+
+  userEmailDisplay.textContent = foundEmail;
+
+  // Mostrar loading
+  routeResumesContent.innerHTML = `
+    <div class="flex items-center justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  `;
+
+  // Abrir modal
+  routeResumesModal.classList.remove('hidden');
+
+  // Buscar resumos de rotas
+  fetch(`/kitetrips/<%= @kitetrip.id %>/users/${userId}/route_resumes`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.length > 0) {
+        routeResumesContent.innerHTML = data.map(resume => `
+          <div class="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200 hover:border-gray-300 transition-colors">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="font-semibold text-gray-900">${resume.route_name}</h4>
+              <a href="/user_route_resumes/${resume.id}"
+                 target="_blank"
+                 class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                Ver Detalhes
+              </a>
+            </div>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span class="text-gray-600">Distância:</span>
+                <span class="font-medium">${resume.total_distance} km</span>
+              </div>
+              <div>
+                <span class="text-gray-600">Tempo:</span>
+                <span class="font-medium">${resume.formatted_total_time}</span>
+              </div>
+              <div>
+                <span class="text-gray-600">Vel. Média:</span>
+                <span class="font-medium">${resume.average_speed} km/h</span>
+              </div>
+              <div>
+                <span class="text-gray-600">Vel. Máxima:</span>
+                <span class="font-medium">${resume.max_speed} km/h</span>
+              </div>
+            </div>
+            <div class="mt-2 text-xs text-gray-500">
+              Processado em ${resume.processed_at}
+            </div>
+          </div>
+        `).join('');
+      } else {
+        routeResumesContent.innerHTML = `
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum resumo encontrado</h3>
+            <p class="mt-1 text-sm text-gray-500">Este usuário ainda não possui resumos de rotas processados para este kitetrip.</p>
+          </div>
+        `;
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao buscar resumos:', error);
+      routeResumesContent.innerHTML = `
+        <div class="text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">Erro ao carregar</h3>
+          <p class="mt-1 text-sm text-gray-500">Não foi possível carregar os resumos de rotas.</p>
+        </div>
+      `;
+    });
 }
 </script>

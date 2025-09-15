@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :user_route_resumes, only: [:show]
+
   resources :kitetrips do
     resources :kitetrip_events
     resources :kitetrip_participants do
@@ -10,6 +12,9 @@ Rails.application.routes.draw do
       end
     end
     resources :kitetrip_routes
+
+    # Route for getting user route resumes for a kitetrip
+    get "users/:user_id/route_resumes", to: "user_route_resumes#index_for_user"
   end
   resources :companies, only: [ :index, :show, :edit, :update ]
   devise_for :users, controllers: {

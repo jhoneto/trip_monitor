@@ -199,18 +199,6 @@ export default class extends Controller {
           })
 
           this.routeMarkers.push(marker)
-        } else {
-          // Create static markers for readonly view
-          const marker = L.marker([latlng.lat, latlng.lng], {
-            title: `Ponto ${index + 1}`
-          }).addTo(this.map)
-
-          marker.bindPopup(`
-            <div class="text-center">
-              <strong>Ponto ${index + 1}</strong><br>
-              <small>Lat: ${latlng.lat.toFixed(5)}<br>Lng: ${latlng.lng.toFixed(5)}</small>
-            </div>
-          `)
         }
       })
 
