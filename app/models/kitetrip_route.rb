@@ -1,5 +1,7 @@
 class KitetripRoute < ApplicationRecord
   belongs_to :kitetrip
+  has_many :user_route_traces, dependent: :destroy
+  has_many :user_route_resumes, dependent: :destroy
 
   validates :start_date, :end_date, presence: true
   validates :name, presence: true

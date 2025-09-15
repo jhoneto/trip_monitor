@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  kitetrip_route: one
+  average_speed: 25.5
+  max_speed: 45.2
+  total_distance: 12.345
+  total_time: 3600
+
+two:
+  user: two
+  kitetrip_route: two
+  average_speed: 30.0
+  max_speed: 50.0
+  total_distance: 15.0
+  total_time: 1800
