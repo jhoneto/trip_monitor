@@ -1,6 +1,6 @@
 class KitetripRoutesController < BaseController
   before_action :set_kitetrip
-  before_action :set_kitetrip_route, only: %i[ show edit update destroy ]
+  before_action :set_kitetrip_route, only: %i[ show edit update destroy monitor ]
 
   # GET /kitetrips/:kitetrip_id/kitetrip_routes or /kitetrips/:kitetrip_id/kitetrip_routes.json
   def index
@@ -75,6 +75,30 @@ class KitetripRoutesController < BaseController
     respond_to do |format|
       format.html { redirect_to kitetrip_kitetrip_routes_path(@kitetrip), notice: "Kitetrip route was successfully destroyed.", status: :see_other }
       format.json { head :no_content }
+    end
+  end
+
+  # GET /kitetrips/:kitetrip_id/kitetrip_routes/1/monitor
+  def monitor
+    @participants = @kitetrip.kitetrip_participants.includes(:user)
+
+    # Get last location for each participant
+    @last_locations = {}
+    @participants.each do |participant|
+      last_trace = UserRouteTrace.where(
+        user: participant.user,
+        kitetrip_route: @kitetrip_route
+      ).order(:created_at).last
+
+      if last_trace
+        @last_locations[participant.user.id] = {
+          latitude: last_trace.latitude.to_f,
+          longitude: last_trace.longitude.to_f,
+          timestamp: last_trace.created_at.iso8601,
+          user_email: participant.user.email,
+          user_initial: participant.user.email.first.upcase
+        }
+      end
     end
   end
 

@@ -11,7 +11,11 @@ Rails.application.routes.draw do
         patch :update_role
       end
     end
-    resources :kitetrip_routes
+    resources :kitetrip_routes do
+      member do
+        get :monitor
+      end
+    end
 
     # Route for getting user route resumes for a kitetrip
     get "users/:user_id/route_resumes", to: "user_route_resumes#index_for_user"

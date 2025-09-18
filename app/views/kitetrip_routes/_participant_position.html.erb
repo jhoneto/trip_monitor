@@ -1,0 +1,23 @@
+<script>
+  // Update participant position on the map
+  (function() {
+    const data = {
+      user_id: <%= user_id %>,
+      user_email: "<%= user_email %>",
+      user_initial: "<%= user_initial %>",
+      latitude: <%= latitude %>,
+      longitude: <%= longitude %>,
+      timestamp: "<%= timestamp %>"
+    };
+
+    console.log("📍 Position update received:", data);
+
+    // Dispatch custom event to update map
+    const event = new CustomEvent('participant-position-update', {
+      detail: data
+    });
+
+    window.dispatchEvent(event);
+    console.log("✅ Position update event dispatched");
+  })();
+</script>
