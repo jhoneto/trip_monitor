@@ -37,7 +37,8 @@ class ProcessUserRouteMetricsJob < ApplicationJob
       average_speed: metrics[:average_speed],
       max_speed: metrics[:max_speed],
       total_distance: metrics[:total_distance],
-      total_time: metrics[:total_time]
+      total_time: metrics[:total_time],
+      status: "closed"
     )
 
     resume.save!

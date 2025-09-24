@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_15_183543) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_23_235550) do
   create_schema "tiger"
   create_schema "tiger_data"
   create_schema "topology"
@@ -604,6 +604,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_15_183543) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.geometry "executed_route", limit: {srid: 0, type: "line_string"}
+    t.string "status", default: "pending", null: false
     t.index ["average_speed"], name: "index_user_route_resumes_on_average_speed"
     t.index ["created_at"], name: "index_user_route_resumes_on_created_at"
     t.index ["executed_route"], name: "index_user_route_resumes_on_executed_route", using: :gist

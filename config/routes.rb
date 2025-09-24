@@ -28,12 +28,14 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       post "auth/login", to: "auth#login"
-      delete "auth/logout", to: "auth#logout"  
+      delete "auth/logout", to: "auth#logout"
       delete "auth/logout_all", to: "auth#logout_all"
-      
+
       resource :user, only: [ :show, :update ]
       resources :kitetrips, only: [ :index, :show ]
       resources :user_route_traces, only: [ :create ]
+      get "user_route_resumes/:kitetrip_route_id", to: "user_route_resumes#show"
+      post "user_route_resumes/:kitetrip_route_id/process_metrics", to: "user_route_resumes#process_metrics"
     end
   end
 
