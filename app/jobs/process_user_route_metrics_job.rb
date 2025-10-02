@@ -15,7 +15,7 @@ class ProcessUserRouteMetricsJob < ApplicationJob
     traces = UserRouteTrace.where(
       user: user,
       kitetrip_route: kitetrip_route
-    ).order(:created_at)
+    ).order(:metric_date)
 
     return unless traces.exists?
 
@@ -23,7 +23,7 @@ class ProcessUserRouteMetricsJob < ApplicationJob
     trace_data = traces.map do |trace|
       {
         coordinates: [ trace.longitude, trace.latitude ],
-        timestamp: trace.created_at,
+        timestamp: trace.metric_date,
         metadata: trace.metadata || {}
       }
     end

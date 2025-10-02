@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_23_235550) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_02_121238) do
   create_schema "tiger"
   create_schema "tiger_data"
   create_schema "topology"
@@ -624,6 +624,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_23_235550) do
     t.json "metadata"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "metric_date"
     t.index ["kitetrip_route_id"], name: "index_user_route_traces_on_kitetrip_route_id"
     t.index ["user_id"], name: "index_user_route_traces_on_user_id"
   end

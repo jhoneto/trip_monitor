@@ -10,7 +10,7 @@ class UserRouteTrace < ApplicationRecord
   after_create :create_resume
 
   def self.emulate_position_updates(kitetrip_rout_id)
-    traces = where(kitetrip_route_id: kitetrip_rout_id).order(:created_at)
+    traces = where(kitetrip_route_id: kitetrip_rout_id).order(:metric_date)
     traces.each do |trace|
       trace.broadcast_position_update
       sleep 1 # Simulate delay between updates

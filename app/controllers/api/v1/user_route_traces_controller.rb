@@ -12,6 +12,6 @@ class Api::V1::UserRouteTracesController < Api::V1::BaseController
   private
 
   def user_route_trace_params
-    params.require(:user_route_trace).permit(:kitetrip_route_id, :latitude, :longitude, metadata: {})
+    params.require(:user_route_trace).permit(:kitetrip_route_id, :latitude, :longitude, :metric_date, metadata: {})
   end
 end
